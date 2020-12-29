@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import math, time, random
 from extendTSP import *
 '''
-注：先在extenTSP.py 中使用随机函数生成实例填入
+注：先在extendTSP.py 中使用随机函数生成实例填入
 跑实例修改下述cases的下标即可
 TODO list: 模块化代码
 '''
@@ -106,6 +106,7 @@ if __name__ == '__main__':
                 if np.random.rand() < np.exp(-(new_value-current_value[-1])/t):
                     current_value.append(new_value)
                     current_solution = new_solution.copy()
+                    best_value.append(best_value[-1])
                 else: # 否则恢复之前状态
                     new_solution = current_solution.copy()
         

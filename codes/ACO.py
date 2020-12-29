@@ -6,11 +6,16 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import math, time, random
 from extendTSP import *
+'''
+注：先在extendTSP.py 中使用随机函数生成实例填入
+跑实例修改下述cases的下标即可
+TODO list: 模块化代码
+'''
 
 if __name__ == '__main__':
     ##### 参数及相关数据初始化 #####
     # 初始化城市实例
-    city_position, goods_class, city_class = extendTSP_cases[4]
+    city_position, goods_class, city_class = extendTSP_cases[4] # extendTSP_generate(39, 25)
     city_num = len(city_position)             # 城市数目
     goods_num = len(set(goods_class))         # 商品种类数目
     distance = record_distance(city_position) # 得到距离矩阵
@@ -30,7 +35,7 @@ if __name__ == '__main__':
     path_table = np.zeros((ant_num, goods_num)).astype(int)    # 路径表
 
     current_value = []    # 存放每次迭代后，当前最佳路径长度
-    avg_value = []        # 存放每次迭代后，路径的平均长度
+    # avg_value = []      # 存放每次迭代后，路径的平均长度
     best_value = []       # 存放每次迭代后，最佳路径长度
     best_solution = None  # 最优路径
 
@@ -40,8 +45,13 @@ if __name__ == '__main__':
         if ant_num <= city_num: # 蚂蚁数目不比城市多
             path_table[:, 0] = np.random.permutation(range(city_num))[:ant_num]
         else:  # 蚂蚁数比城市数多，需要有城市放多个蚂蚁
-            path_table[:city_num, 0] = np.random.permutation(range(city_num))[:]
-            path_table[city_num:, 0] = np.random.permutation(range(city_num))[:ant_num - city_num]
+            inited_ants = 0       # 已经分配了的蚂蚁数量
+            remain_ants = ant_num # 剩余的蚂蚁数量
+            while remain_ants > city_num:
+                remain_ants -= city_num
+                path_table[inited_ants:inited_ants + city_num, 0] = np.random.permutation(range(city_num))[:]
+                inited_ants += city_num
+            path_table[inited_ants:, 0] = np.random.permutation(range(city_num))[:remain_ants]
 
         length = np.zeros(ant_num)  # 记录每只蚂蚁走过的路径长度
 
@@ -64,8 +74,8 @@ if __name__ == '__main__':
                 # 如果按照轮盘没有结果的话则重新构造放宽限制
                 k = -1
                 t = 1
-                trans_cumsum_prob = (trans_prob / sum(trans_prob)).cumsum() # 概率累积求和
-                trans_cumsum_prob -= np.random.rand() # 随机生成下个城市的转移概率，再用区间比较
+                const_trans_cumsum_prob = (trans_prob / sum(trans_prob)).cumsum()     # 概率累积求和
+                trans_cumsum_prob = const_trans_cumsum_prob.copy() - np.random.rand() # 随机生成下个城市的转移概率，再用区间比较
                 while True:
                     # 寻找下一个要访问的城市
                     for index, prob in enumerate(trans_cumsum_prob):
@@ -74,7 +84,7 @@ if __name__ == '__main__':
                                 k = unvisited[index]
                                 break
                     if k == -1:
-                        trans_cumsum_prob = (trans_prob / sum(trans_prob)).cumsum() # 概率累积求和
+                        trans_cumsum_prob = const_trans_cumsum_prob.copy()       # 提速? 似乎有点儿作用
                         trans_cumsum_prob -= np.random.rand() * math.pow(0.8, t) # 随机生成下个城市的转移概率，放宽条件
                         t += 1
                     else:
@@ -88,9 +98,10 @@ if __name__ == '__main__':
                 visiting = k                        # 将 k 设为当前所在城市
             
             length[i] +=  distance[visiting][path_table[i, 0]] # 增加当前路径长度(最后一个城市到第一个城市的距离)
-            print(str(iter) + '/' + str(iter_num), str(i) + '/' + str(ant_num))
+        
+        print("iter:", str(iter) + '/' + str(iter_num)) # , str(i) + '/' + str(ant_num))
         # 更新平均路径
-        avg_value.append(length.mean()) # 记录本轮每只蚂蚁所走的平均路径
+        # avg_value.append(length.mean()) # 记录本轮每只蚂蚁所走的平均路径
 
         ##### 求出最佳路径 #####
         current_value.append(length.min())
@@ -123,6 +134,7 @@ if __name__ == '__main__':
     print("time consuming: %lf s" % (end_time - start_time))
 
     ##### 显示收敛情况 #####
+    best_solution = list(best_solution)
     print(best_solution, best_value[-1]) # , len(best_value)
     plt.plot(best_value)
     plt.title("best value")

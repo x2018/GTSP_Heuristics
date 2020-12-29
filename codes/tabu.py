@@ -7,9 +7,10 @@ import matplotlib.pyplot as plt
 import math, time, random
 from extendTSP import *
 '''
-注：先在extenTSP.py 中使用随机函数生成实例填入
+注：先在extendTSP.py 中使用随机函数生成实例填入
 跑实例修改下述cases的下标即可
 TODO list: 模块化代码
+消除解为[0...0]的情况 √ (对候选集做检查)
 '''
 
 if __name__ == '__main__': 
@@ -28,8 +29,8 @@ if __name__ == '__main__':
 
     # 候选集
     candidate_num = city_num
-    candidate = [[0 for col in range(goods_num)] for raw in range(candidate_num)]
-    candidate_value = [0 for col in range(candidate_num)]
+    candidate = []
+    candidate_value = []
 
     start_time = time.time()
     ##### 生成随机初始解 #####
@@ -48,6 +49,9 @@ if __name__ == '__main__':
     ##### 开始迭代 #####
     for i in range(iter_num):
         ##### 得到邻域 候选解 #####
+        # 初始化本轮候选集
+        candidate = []
+        candidate_value = []
         # 存储两个交换的位置 & 同类商品城市交换的情况
         exchange_position = []
         exchange_city = []
@@ -69,18 +73,20 @@ if __name__ == '__main__':
                             if tmp != index:
                                 break
                         if city_class[goods][tmp] not in exchange_city:
-                            candidate[temp] = current_solution.copy()
+                            candidate.append(current_solution.copy())
                             candidate[temp][loc] = city_class[goods][tmp]
             else: # 交换两个城市
                 current = random.sample(range(0, goods_num), 2)
                 if current not in exchange_position:
                     exchange_position.append(current)
-                    candidate[temp] = current_solution.copy()
+                    candidate.append(current_solution.copy())
                     candidate[temp][current[0]], candidate[temp][current[1]] = candidate[temp][current[1]], candidate[temp][current[0]] # 交换
 
+            if len(candidate) == temp:
+                continue
             # 若不在禁忌表中则放入候选集
             if candidate[temp] not in tabu_list:
-                candidate_value[temp] = cal_cost(distance, candidate[temp], goods_num)
+                candidate_value.append(cal_cost(distance, candidate[temp], goods_num))
                 temp += 1
             if temp >= candidate_num:
                 break
@@ -100,7 +106,7 @@ if __name__ == '__main__':
         else:
             best_value.append(best_value[-1])
         
-        # 加入禁忌表
+        # 将最优的加入禁忌表
         tabu_list.append(candidate[best_index])
         tabu_time.append(tabu_limit)
         current_tabu_num += 1
@@ -114,14 +120,11 @@ if __name__ == '__main__':
         for i in range(current_tabu_num):
             if tabu_time[i] == 0:
                 del_num += 1
-                tabu_list[i] = temp
+                tabu_list.pop(i)
             
         current_tabu_num -= del_num        
         while 0 in tabu_time:
             tabu_time.remove(0)
-        
-        while temp in tabu_list:
-            tabu_list.remove(temp)
 
     end_time = time.time()
     print("time consuming: %lf s" % (end_time- start_time))

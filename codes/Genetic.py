@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import math, time, random
 from extendTSP import *
 '''
-注：先在extenTSP.goods_num 中使用随机函数生成实例填入
+注：先在extendTSP.py 中使用随机函数生成实例填入
 跑实例修改下述cases的下标即可
 TODO list: 
 1 模块化代码; 
@@ -171,7 +171,6 @@ def best(pop=None, value=None):
 
 if __name__ == '__main__': 
     ##### 参数及相关数据初始化 #####
-    # 初始化城市实例
     # 初始化城市实例
     city_position, goods_class, city_class = extendTSP_cases[4]
     city_num = len(city_position)             # 城市数目

@@ -87,11 +87,11 @@ def record_distance(city_position):
 
 ##### 计算当前解的消耗 #####
 def cal_cost(distance, solution, goods_num):
-    value = 0
+    cost = 0
     for j in range(goods_num-1):
-        value += distance[solution[j]][solution[j+1]]
-    value += distance[solution[0]][solution[goods_num - 1]]
-    return value
+        cost += distance[solution[j]][solution[j+1]]
+    cost += distance[solution[0]][solution[goods_num - 1]]
+    return cost
 
 ##### 获取绘图散点信息 #####
 def get_plot_points(city_class, city_position):
