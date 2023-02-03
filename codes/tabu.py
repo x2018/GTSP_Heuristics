@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import math, time, random
 from extendTSP import *
 '''
-注：先在extendTSP.py 中使用随机函数生成实例填入
+注:先在extendTSP.py 中使用随机函数生成实例填入
 跑实例修改下述cases的下标即可
 TODO list: 模块化代码
 消除解为[0...0]的情况 √ (对候选集做检查)
@@ -52,19 +52,15 @@ if __name__ == '__main__':
         # 初始化本轮候选集
         candidate = []
         candidate_value = []
-        # 存储两个交换的位置 & 同类商品城市交换的情况
-        exchange_position = []
-        exchange_city = []
         temp = 0
         # 随机选取邻域
         while True:
             # 从邻域选择新解 - 同一类城市交换 + 现有的两交换
             seed = np.random.rand()
             if seed > 0.5: # 随机交换卖同一类商品城市的两个节点
-                while True:
-                    goods = random.randrange(goods_num)
-                    if len(city_class[goods]) > 1:
-                        break
+                goods = random.randrange(goods_num)
+                if len(city_class[goods]) == 1:
+                    continue
                 for index, city in enumerate(city_class[goods]):
                     if city in current_solution:
                         loc = current_solution.index(city)
@@ -72,15 +68,12 @@ if __name__ == '__main__':
                             tmp = random.randrange(len(city_class[goods]))
                             if tmp != index:
                                 break
-                        if city_class[goods][tmp] not in exchange_city:
-                            candidate.append(current_solution.copy())
-                            candidate[temp][loc] = city_class[goods][tmp]
+                        candidate.append(current_solution.copy())
+                        candidate[temp][loc] = city_class[goods][tmp]
             else: # 交换两个城市
                 current = random.sample(range(0, goods_num), 2)
-                if current not in exchange_position:
-                    exchange_position.append(current)
-                    candidate.append(current_solution.copy())
-                    candidate[temp][current[0]], candidate[temp][current[1]] = candidate[temp][current[1]], candidate[temp][current[0]] # 交换
+                candidate.append(current_solution.copy())
+                candidate[temp][current[0]], candidate[temp][current[1]] = candidate[temp][current[1]], candidate[temp][current[0]] # 交换
 
             if len(candidate) == temp:
                 continue
@@ -88,6 +81,8 @@ if __name__ == '__main__':
             if candidate[temp] not in tabu_list:
                 candidate_value.append(cal_cost(distance, candidate[temp], goods_num))
                 temp += 1
+            else:
+                candidate.pop()
             if temp >= candidate_num:
                 break
 

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import math, time, random
 from extendTSP import *
 '''
-注：先在extendTSP.py 中使用随机函数生成实例填入
+注:先在extendTSP.py 中使用随机函数生成实例填入
 跑实例修改下述cases的下标即可
 TODO list: 模块化代码
 '''
